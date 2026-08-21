@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — VIXEN OTT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0c10;
+    --ink-2: #0d1015;
+    --surface: #14171d;
+    --surface-2: #1c2027;
+    --amber: #e8892c;
+    --amber-soft: #f0a755;
+    --ember: #ff5c39;
+    --frost: #63e6d4;
+    --paper: #f3efe6;
+    --muted: #9b968c;
+    --line: rgba(243, 239, 230, 0.09);
+    --line-strong: rgba(243, 239, 230, 0.16);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; }
+
+  /* ---------- BACKGROUND POSTER GRID & GRADIENTS ---------- */
+  .bg-wrapper {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .bg-grid {
+    position: absolute;
+    inset: -50px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    opacity: 0.18;
+    filter: grayscale(40%) blur(2px);
+    transform: rotate(-3deg) scale(1.1);
+  }
+
+  .bg-grid img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  .bg-overlay {
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(circle at center, rgba(10, 12, 16, 0.82) 0%, var(--ink) 90%),
+      linear-gradient(to top, var(--ink) 5%, transparent 60%);
+  }
+
+  /* ---------- HEADER / BRAND ---------- */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 24px clamp(20px, 4vw, 56px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .fox-mark { width: 26px; height: 22px; }
+  .fox-mark path { fill: var(--amber); }
+  .wordmark {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    font-family: 'Big Shoulders Display', sans-serif;
+  }
+  .wordmark .name {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+  }
+  .wordmark .tag {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: var(--ink);
+    background: var(--amber);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .back-link {
+    font-size: 14px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    transition: color .2s ease;
+  }
+  .back-link:hover { color: var(--amber-soft); }
+
+  /* ---------- AUTH CARD CONTAINER ---------- */
+  .auth-container {
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 440px;
+    background: rgba(20, 23, 29, 0.88);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--line-strong);
+    border-radius: 16px;
+    padding: 38px clamp(20px, 5vw, 36px);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(232, 137, 44, 0.08);
+  }
+
+  /* ---------- TAB SWITCHER (SIGN IN / SIGN UP) ---------- */
+  .tab-group {
+    display: flex;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 4px;
+    margin-bottom: 28px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: none;
+    color: var(--muted);
+    font-size: 13.5px;
+    font-weight: 600;
+    border-radius: 6px;
+    transition: all .2s ease;
+  }
+
+  .tab-btn.active {
+    background: var(--surface);
+    color: var(--paper);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+
+  .auth-header {
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  .auth-header h1 {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin: 0 0 6px;
+  }
+  .auth-header p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  /* ---------- FORM FIELDS ---------- */
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #c5c1b7;
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+  }
+
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-wrapper input {
+    width: 100%;
+    background: var(--ink);
+    border: 1px solid var(--line-strong);
+    color: var(--paper);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-family: inherit;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+
+  .input-wrapper input:focus {
+    outline: none;
+    border-color: var(--amber);
+    box-shadow: 0 0 0 3px rgba(232, 137, 44, 0.2);
+  }
+
+  .toggle-pwd {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+  }
+  .toggle-pwd:hover { color: var(--paper); }
+  .toggle-pwd svg { width: 18px; height: 18px; }
+
+  /* ---------- OPTIONS (REMEMBER / FORGOT) ---------- */
+  .form-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12.5px;
+    margin-bottom: 24px;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .checkbox-label input {
+    accent-color: var(--amber);
+    cursor: pointer;
+  }
+
+  .forgot-link {
+    color: var(--amber-soft);
+    font-weight: 500;
+  }
+  .forgot-link:hover { text-decoration: underline; }
+
+  /* ---------- SUBMIT BUTTON ---------- */
+  .btn-submit {
+    width: 100%;
+    background: var(--amber);
+    color: #1a0f03;
+    border: none;
+    padding: 13px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background .2s ease, transform .1s ease;
+  }
+  .btn-submit:hover { background: var(--amber-soft); }
+  .btn-submit:active { transform: scale(0.98); }
+
+  /* ---------- SOCIAL LOGINS ---------- */
+  .divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 24px 0 20px;
+    color: var(--muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--line);
+  }
+  .divider span { padding: 0 12px; }
+
+  .social-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .btn-social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--line-strong);
+    color: var(--paper);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background .2s ease, border-color .2s ease;
+  }
+  .btn-social:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+  .btn-social svg { width: 16px; height: 16px; }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    position: relative;
+    z-index: 10;
+    padding: 18px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    border-top: 1px solid var(--line);
+  }
+
+  /* Helper class to toggle between Sign In and Sign Up */
+  .signup-only { display: none; }
+  .is-signup .signup-only { display: block; }
+  .is-signup .signin-only { display: none; }
+</style>
+</head>
+<body>
+
+  <!-- Background Ambience with Posters -->
+  <div class="bg-wrapper">
+    <div class="bg-grid">
+      <img src="https://img.youtube.com/vi/eRsGyueVLvQ/maxresdefault.jpg" alt="Poster 1">
+      <img src="https://img.youtube.com/vi/gdilPxtEMoM/maxresdefault.jpg" alt="Poster 2">
+      <img src="https://img.youtube.com/vi/1ovgwN7veHU/maxresdefault.jpg" alt="Poster 3">
+      <img src="https://img.youtube.com/vi/41hv2tW5Lc4/maxresdefault.jpg" alt="Poster 4">
+    </div>
+    <div class="bg-overlay"></div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <a href="index.html" class="brand">
+      <svg class="fox-mark" viewBox="0 0 26 22" aria-hidden="true">
+        <path d="M2 0L11 9 6 12z"/><path d="M24 0L15 9 20 12z"/>
+        <path d="M13 22C7 22 3 18 3 12.5 3 9 6 6.5 9 8c1 .6 2 1.6 4 1.6s3-1 4-1.6c3-1.5 6 1 6 4.5C23 18 19 22 13 22z"/>
+      </svg>
+      <div class="wordmark">
+        <span class="name">VIXEN</span>
+        <span class="tag">OTT</span>
+      </div>
+    </a>
+    <a href="index.html" class="back-link">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back to Home
+    </a>
+  </header>
+
+  <!-- Main Login Card -->
+  <main class="auth-container">
+    <div class="auth-card" id="authCard">
+      
+      <!-- Tab Controls -->
+      <div class="tab-group">
+        <button class="tab-btn active" id="tabSignin" onclick="setMode('signin')">Sign In</button>
+        <button class="tab-btn" id="tabSignup" onclick="setMode('signup')">Create Account</button>
+      </div>
+
+      <div class="auth-header">
+        <h1 id="authTitle">Welcome Back</h1>
+        <p id="authSubtitle">Stream originals, movies, and series anywhere.</p>
+      </div>
+
+      <!-- Auth Form -->
+      <form onsubmit="handleAuth(event)">
+        <!-- Full Name (Sign Up only) -->
+        <div class="form-group signup-only">
+          <label for="fullname">Full Name</label>
+          <div class="input-wrapper">
+            <input type="text" id="fullname" placeholder="e.g. John Doe">
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <div class="input-wrapper">
+            <input type="email" id="email" placeholder="name@domain.com" required>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="password" placeholder="••••••••" required>
+            <button type="button" class="toggle-pwd" onclick="togglePasswordVisibility()" aria-label="Toggle password visibility">
+              <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Remember / Forgot Password -->
+        <div class="form-meta signin-only">
+          <label class="checkbox-label">
+            <input type="checkbox" checked>
+            <span>Remember me</span>
+          </label>
+          <a href="#" class="forgot-link" onclick="alert('Password reset link sent to email!'); return false;">Forgot password?</a>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <span>Sign In</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+
+      <!-- Social Logins -->
+      <div class="divider"><span>Or continue with</span></div>
+
+      <div class="social-grid">
+        <button class="btn-social" type="button" onclick="handleSocialAuth('Google')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/></svg>
+          Google
+        </button>
+        <button class="btn-social" type="button" onclick="handleSocialAuth('Apple')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.88c.64-.78 1.08-1.86.96-2.88-.93.04-2.05.62-2.71 1.4-.58.67-1.09 1.76-.95 2.81 1.04.08 2.07-.55 2.7-.33"/></svg>
+          Apple
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    © 2026 Vixen OTT. All rights reserved. • <a href="#" style="color:var(--muted)">Privacy Policy</a> • <a href="#" style="color:var(--muted)">Terms of Service</a>
+  </footer>
+
+  <!-- Script for UI toggle, eye icon & demo navigation -->
+  <script>
+    let currentMode = 'signin';
+    const authCard = document.getElementById('authCard');
+    const tabSignin = document.getElementById('tabSignin');
+    const tabSignup = document.getElementById('tabSignup');
+    const authTitle = document.getElementById('authTitle');
+    const authSubtitle = document.getElementById('authSubtitle');
+    const submitBtnText = document.querySelector('#submitBtn span');
+
+    function setMode(mode) {
+      currentMode = mode;
+      if (mode === 'signup') {
+        authCard.classList.add('is-signup');
+        tabSignup.classList.add('active');
+        tabSignin.classList.remove('active');
+        authTitle.textContent = 'Create Account';
+        authSubtitle.textContent = 'Start your unlimited streaming experience.';
+        submitBtnText.textContent = 'Get Started';
+      } else {
+        authCard.classList.remove('is-signup');
+        tabSignin.classList.add('active');
+        tabSignup.classList.remove('active');
+        authTitle.textContent = 'Welcome Back';
+        authSubtitle.textContent = 'Stream originals, movies, and series anywhere.';
+        submitBtnText.textContent = 'Sign In';
+      }
+    }
+
+    function togglePasswordVisibility() {
+      const pwd = document.getElementById('password');
+      const eye = document.getElementById('eyeIcon');
+      if (pwd.type === 'password') {
+        pwd.type = 'text';
+        eye.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+      } else {
+        pwd.type = 'password';
+        eye.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+      }
+    }
+
+    function handleAuth(event) {
+      event.preventDefault();
+      const email = document.getElementById('email').value;
+      
+      // Simple routing demo: if typing admin credentials, go to admin panel
+      if (email.toLowerCase().includes('admin')) {
+        alert('Welcome Admin! Redirecting to Admin Dashboard...');
+        window.location.href = 'admin.html';
+      } else {
+        alert((currentMode === 'signin' ? 'Sign In' : 'Account creation') + ' successful! Redirecting to VIXEN OTT...');
+        window.location.href = 'index.html';
+      }
+    }
+
+    function handleSocialAuth(provider) {
+      alert(`Connecting to ${provider} authentication... Redirecting to home.`);
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>
